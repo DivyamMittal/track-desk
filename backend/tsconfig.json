@@ -9,7 +9,7 @@
     "resolveJsonModule": true,
     "esModuleInterop": true,
     "forceConsistentCasingInFileNames": true,
-    "outDir": "dist",
+    "outDir": "public",
     "rootDir": "src",
     "noEmit": false,
     "types": ["node"]
