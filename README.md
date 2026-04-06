@@ -14,6 +14,12 @@ cd backend && npm install && npm run dev
 cd frontend && npm install && npm run dev
 ```
 
+## Deploy
+
+- Create two separate Vercel projects.
+- Frontend project root must be [frontend](/Users/divyam/Documents/CRISIL/frontend). It uses [frontend/vercel.json](/Users/divyam/Documents/CRISIL/frontend/vercel.json) and publishes the Vite build.
+- Backend project root must be [backend](/Users/divyam/Documents/CRISIL/backend). It uses [backend/vercel.json](/Users/divyam/Documents/CRISIL/backend/vercel.json) so requests rewrite to the serverless API entrypoint.
+
 ## Notes
 
 - All persisted timestamps are UTC/GMT.
