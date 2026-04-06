@@ -1,13 +1,13 @@
 import Joi from "joi";
 import { Router } from "express";
 
-import { ApprovalStatus, ApprovalType, TaskStatus, UserRole } from "../../../shared";
-import { AppError } from "../../../common/errors/app-error";
-import { asyncHandler } from "../../../common/middleware/async-handler";
-import { requireAuth, requireRole } from "../../../common/middleware/auth";
-import { validate } from "../../../common/middleware/validate";
-import { ApprovalRequestModel, TaskModel, TimeEntryModel, UserModel } from "../../../database/models";
-import { toPlainList, toPlain } from "../../../database/serializers";
+import { ApprovalStatus, ApprovalType, TaskStatus, UserRole } from "../../../shared/index.js";
+import { AppError } from "../../../common/errors/app-error.js";
+import { asyncHandler } from "../../../common/middleware/async-handler.js";
+import { requireAuth, requireRole } from "../../../common/middleware/auth.js";
+import { validate } from "../../../common/middleware/validate.js";
+import { ApprovalRequestModel, TaskModel, TimeEntryModel, UserModel } from "../../../database/models.js";
+import { toPlainList, toPlain } from "../../../database/serializers.js";
 
 const reviewSchema = {
   params: Joi.object({

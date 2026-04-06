@@ -1,10 +1,10 @@
 import { Router } from "express";
 
-import { UserRole } from "../../../shared";
-import { asyncHandler } from "../../../common/middleware/async-handler";
-import { requireAuth } from "../../../common/middleware/auth";
-import { TimeEntryModel, UserModel } from "../../../database/models";
-import { toPlainList } from "../../../database/serializers";
+import { UserRole } from "../../../shared/index.js";
+import { asyncHandler } from "../../../common/middleware/async-handler.js";
+import { requireAuth } from "../../../common/middleware/auth.js";
+import { TimeEntryModel, UserModel } from "../../../database/models.js";
+import { toPlainList } from "../../../database/serializers.js";
 
 export const timeTrackingRouter = Router();
 
@@ -29,4 +29,3 @@ timeTrackingRouter.get(
     return response.json(toPlainList(entries));
   }),
 );
-

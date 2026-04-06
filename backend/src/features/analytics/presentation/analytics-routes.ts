@@ -1,10 +1,10 @@
 import Joi from "joi";
 import { Router } from "express";
 
-import { ApprovalStatus, TaskStatus, TimerState, UserRole } from "../../../shared";
-import { asyncHandler } from "../../../common/middleware/async-handler";
-import { requireAuth } from "../../../common/middleware/auth";
-import { validate } from "../../../common/middleware/validate";
+import { ApprovalStatus, TaskStatus, TimerState, UserRole } from "../../../shared/index.js";
+import { asyncHandler } from "../../../common/middleware/async-handler.js";
+import { requireAuth } from "../../../common/middleware/auth.js";
+import { validate } from "../../../common/middleware/validate.js";
 import {
   ActivityModel,
   ApprovalRequestModel,
@@ -12,8 +12,8 @@ import {
   TaskModel,
   TimeEntryModel,
   UserModel,
-} from "../../../database/models";
-import { toPlainList } from "../../../database/serializers";
+} from "../../../database/models.js";
+import { toPlainList } from "../../../database/serializers.js";
 
 const dashboardQuerySchema = {
   query: Joi.object({

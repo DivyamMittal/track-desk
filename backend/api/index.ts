@@ -1,7 +1,7 @@
 import type { VercelRequest, VercelResponse } from "@vercel/node";
 
-import { createApp } from "../src/app";
-import { connectDatabase } from "../src/database/mongoose";
+import { createApp } from "../src/app.js";
+import { connectDatabase } from "../src/database/mongoose.js";
 
 const app = createApp();
 

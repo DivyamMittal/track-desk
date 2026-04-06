@@ -1,13 +1,13 @@
 import { Router } from "express";
 
-import { UserRole } from "../../../shared";
-import { AppError } from "../../../common/errors/app-error";
-import { asyncHandler } from "../../../common/middleware/async-handler";
-import { requireAuth, requireRole } from "../../../common/middleware/auth";
-import { validate } from "../../../common/middleware/validate";
-import { ActivityModel, ProjectModel, TaskModel } from "../../../database/models";
-import { toPlain, toPlainList } from "../../../database/serializers";
-import { createActivitySchema } from "./activity-validation";
+import { UserRole } from "../../../shared/index.js";
+import { AppError } from "../../../common/errors/app-error.js";
+import { asyncHandler } from "../../../common/middleware/async-handler.js";
+import { requireAuth, requireRole } from "../../../common/middleware/auth.js";
+import { validate } from "../../../common/middleware/validate.js";
+import { ActivityModel, ProjectModel, TaskModel } from "../../../database/models.js";
+import { toPlain, toPlainList } from "../../../database/serializers.js";
+import { createActivitySchema } from "./activity-validation.js";
 
 export const activitiesRouter = Router();
 

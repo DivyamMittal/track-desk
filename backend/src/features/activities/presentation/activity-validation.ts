@@ -1,6 +1,6 @@
 import Joi from "joi";
 
-import { ProjectStatus } from "../../../shared";
+import { ProjectStatus } from "../../../shared/index.js";
 
 export const createActivitySchema = {
   body: Joi.object({
@@ -12,4 +12,3 @@ export const createActivitySchema = {
       .default(ProjectStatus.ACTIVE),
   }),
 };
-

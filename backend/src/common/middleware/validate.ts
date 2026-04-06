@@ -1,7 +1,7 @@
 import type { NextFunction, Request, Response } from "express";
 import type { ObjectSchema } from "joi";
 
-import { AppError } from "../errors/app-error";
+import { AppError } from "../errors/app-error.js";
 
 type SchemaMap = {
   body?: ObjectSchema;
@@ -41,4 +41,3 @@ export const validate =
 
     next();
   };
-

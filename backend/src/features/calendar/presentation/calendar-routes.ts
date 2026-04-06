@@ -1,12 +1,12 @@
 import Joi from "joi";
 import { Router } from "express";
 
-import { UserRole } from "../../../shared";
-import { asyncHandler } from "../../../common/middleware/async-handler";
-import { requireAuth, requireRole } from "../../../common/middleware/auth";
-import { validate } from "../../../common/middleware/validate";
-import { HolidayModel } from "../../../database/models";
-import { toPlain, toPlainList } from "../../../database/serializers";
+import { UserRole } from "../../../shared/index.js";
+import { asyncHandler } from "../../../common/middleware/async-handler.js";
+import { requireAuth, requireRole } from "../../../common/middleware/auth.js";
+import { validate } from "../../../common/middleware/validate.js";
+import { HolidayModel } from "../../../database/models.js";
+import { toPlain, toPlainList } from "../../../database/serializers.js";
 
 const holidaySchema = {
   body: Joi.object({

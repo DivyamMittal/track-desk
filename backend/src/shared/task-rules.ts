@@ -1,4 +1,4 @@
-import { ApprovalType, TaskStatus, TimerState } from "./enums";
+import { ApprovalType, TaskStatus, TimerState } from "./enums.js";
 
 export const nextStatusForTimerState = (
   currentStatus: TaskStatus,
@@ -28,4 +28,3 @@ export const approvalTypeForStatus = (nextStatus: TaskStatus) => {
 
   return ApprovalType.TASK_UPDATE;
 };
-

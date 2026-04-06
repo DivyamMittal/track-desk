@@ -7,11 +7,11 @@ import {
   TimeEntryType,
   TimerState,
   nextStatusForTimerState,
-} from "../../../shared";
-import { AppError } from "../../../common/errors/app-error";
-import { ApprovalRequestModel, TaskModel, TimeEntryModel } from "../../../database/models";
-import { toPlain } from "../../../database/serializers";
-import { calculateElapsedWholeMinutes, calculateElapsedWholeSeconds } from "../domain/elapsed-time";
+} from "../../../shared/index.js";
+import { AppError } from "../../../common/errors/app-error.js";
+import { ApprovalRequestModel, TaskModel, TimeEntryModel } from "../../../database/models.js";
+import { toPlain } from "../../../database/serializers.js";
+import { calculateElapsedWholeMinutes, calculateElapsedWholeSeconds } from "../domain/elapsed-time.js";
 
 export class TaskService {
   async startTimer(taskId: string, employeeId: string) {

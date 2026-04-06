@@ -1,19 +1,19 @@
 import bcrypt from "bcryptjs";
 import { Router } from "express";
 
-import { CompanyRole, UserRole } from "../../../shared";
-import { AppError } from "../../../common/errors/app-error";
-import { asyncHandler } from "../../../common/middleware/async-handler";
-import { requireAuth, requireRole } from "../../../common/middleware/auth";
-import { validate } from "../../../common/middleware/validate";
-import { UserModel } from "../../../database/models";
-import { toPlain, toPlainList } from "../../../database/serializers";
+import { CompanyRole, UserRole } from "../../../shared/index.js";
+import { AppError } from "../../../common/errors/app-error.js";
+import { asyncHandler } from "../../../common/middleware/async-handler.js";
+import { requireAuth, requireRole } from "../../../common/middleware/auth.js";
+import { validate } from "../../../common/middleware/validate.js";
+import { UserModel } from "../../../database/models.js";
+import { toPlain, toPlainList } from "../../../database/serializers.js";
 import {
   assignManagerSchema,
   createUserSchema,
   statusUpdateSchema,
   userQuerySchema,
-} from "./user-validation";
+} from "./user-validation.js";
 
 export const usersRouter = Router();
 

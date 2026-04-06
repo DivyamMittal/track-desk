@@ -9,7 +9,7 @@ import {
   TimeEntryType,
   TimerState,
   UserRole,
-} from "./enums";
+} from "./enums.js";
 
 export type EntityId = string;
 

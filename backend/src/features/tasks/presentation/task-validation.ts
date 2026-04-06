@@ -1,6 +1,6 @@
 import Joi from "joi";
 
-import { Priority, TaskStatus, TimerState } from "../../../shared";
+import { Priority, TaskStatus, TimerState } from "../../../shared/index.js";
 
 export const taskIdParamsSchema = {
   params: Joi.object({

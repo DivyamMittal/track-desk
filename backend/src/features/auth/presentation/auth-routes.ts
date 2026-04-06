@@ -1,10 +1,10 @@
 import { Router } from "express";
 
-import { asyncHandler } from "../../../common/middleware/async-handler";
-import { requireAuth } from "../../../common/middleware/auth";
-import { validate } from "../../../common/middleware/validate";
-import { authService } from "../application/auth-service";
-import { loginSchema } from "./auth-validation";
+import { asyncHandler } from "../../../common/middleware/async-handler.js";
+import { requireAuth } from "../../../common/middleware/auth.js";
+import { validate } from "../../../common/middleware/validate.js";
+import { authService } from "../application/auth-service.js";
+import { loginSchema } from "./auth-validation.js";
 
 export const authRouter = Router();
 

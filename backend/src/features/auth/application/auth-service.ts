@@ -1,9 +1,9 @@
 import bcrypt from "bcryptjs";
 
-import { AppError } from "../../../common/errors/app-error";
-import { signAccessToken } from "../../../common/middleware/auth";
-import { toPlain } from "../../../database/serializers";
-import { UserModel } from "../../../database/models";
+import { AppError } from "../../../common/errors/app-error.js";
+import { signAccessToken } from "../../../common/middleware/auth.js";
+import { toPlain } from "../../../database/serializers.js";
+import { UserModel } from "../../../database/models.js";
 
 export class AuthService {
   async login(email: string, password: string) {

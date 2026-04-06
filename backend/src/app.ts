@@ -2,17 +2,17 @@ import cors from "cors";
 import express from "express";
 import morgan from "morgan";
 
-import { errorHandler } from "./common/middleware/error-handler";
-import { activitiesRouter } from "./features/activities/presentation/activity-routes";
-import { analyticsRouter } from "./features/analytics/presentation/analytics-routes";
-import { approvalsRouter } from "./features/approvals/presentation/approval-routes";
-import { authRouter } from "./features/auth/presentation/auth-routes";
-import { calendarRouter } from "./features/calendar/presentation/calendar-routes";
-import { commentsRouter } from "./features/comments/presentation/comment-routes";
-import { projectsRouter } from "./features/projects/presentation/project-routes";
-import { tasksRouter } from "./features/tasks/presentation/task-routes";
-import { timeTrackingRouter } from "./features/time-tracking/presentation/time-tracking-routes";
-import { usersRouter } from "./features/users/presentation/user-routes";
+import { errorHandler } from "./common/middleware/error-handler.js";
+import { activitiesRouter } from "./features/activities/presentation/activity-routes.js";
+import { analyticsRouter } from "./features/analytics/presentation/analytics-routes.js";
+import { approvalsRouter } from "./features/approvals/presentation/approval-routes.js";
+import { authRouter } from "./features/auth/presentation/auth-routes.js";
+import { calendarRouter } from "./features/calendar/presentation/calendar-routes.js";
+import { commentsRouter } from "./features/comments/presentation/comment-routes.js";
+import { projectsRouter } from "./features/projects/presentation/project-routes.js";
+import { tasksRouter } from "./features/tasks/presentation/task-routes.js";
+import { timeTrackingRouter } from "./features/time-tracking/presentation/time-tracking-routes.js";
+import { usersRouter } from "./features/users/presentation/user-routes.js";
 
 export const createApp = () => {
   const app = express();

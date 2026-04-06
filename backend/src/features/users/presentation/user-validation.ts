@@ -1,7 +1,7 @@
 import Joi from "joi";
 
-import { CompanyRole, UserRole } from "../../../shared";
-import { supportedTimezones } from "../../../shared/timezones";
+import { CompanyRole, UserRole } from "../../../shared/index.js";
+import { supportedTimezones } from "../../../shared/timezones.js";
 
 export const userQuerySchema = {
   query: Joi.object({

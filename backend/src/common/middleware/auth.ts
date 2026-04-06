@@ -1,11 +1,11 @@
 import type { NextFunction, Request, Response } from "express";
 import jwt, { type SignOptions } from "jsonwebtoken";
 
-import { UserRole } from "../../shared";
+import { UserRole } from "../../shared/index.js";
 
-import { env } from "../../config/env";
-import { UserModel } from "../../database/models";
-import { AppError } from "../errors/app-error";
+import { env } from "../../config/env.js";
+import { UserModel } from "../../database/models.js";
+import { AppError } from "../errors/app-error.js";
 
 export interface AuthenticatedUser {
   id: string;

@@ -1,6 +1,6 @@
 import Joi from "joi";
 
-import { ProjectStatus } from "../../../shared";
+import { ProjectStatus } from "../../../shared/index.js";
 
 export const createProjectSchema = {
   body: Joi.object({
@@ -14,4 +14,3 @@ export const createProjectSchema = {
     targetEndDateUtc: Joi.string().isoDate().required(),
   }),
 };
-

@@ -1,7 +1,7 @@
 import mongoose from "mongoose";
 
-import { env } from "../config/env";
-import { seedDefaultAdmin } from "./seed";
+import { env } from "../config/env.js";
+import { seedDefaultAdmin } from "./seed.js";
 
 let connectionPromise: Promise<typeof mongoose> | null = null;
 

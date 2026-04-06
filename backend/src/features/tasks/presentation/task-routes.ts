@@ -1,10 +1,10 @@
 import { Router } from "express";
 
-import { TaskStatus, TimerState, UserRole } from "../../../shared";
-import { AppError } from "../../../common/errors/app-error";
-import { asyncHandler } from "../../../common/middleware/async-handler";
-import { requireAuth, requireRole } from "../../../common/middleware/auth";
-import { validate } from "../../../common/middleware/validate";
+import { TaskStatus, TimerState, UserRole } from "../../../shared/index.js";
+import { AppError } from "../../../common/errors/app-error.js";
+import { asyncHandler } from "../../../common/middleware/async-handler.js";
+import { requireAuth, requireRole } from "../../../common/middleware/auth.js";
+import { validate } from "../../../common/middleware/validate.js";
 import {
   ActivityModel,
   ApprovalRequestModel,
@@ -13,9 +13,9 @@ import {
   TaskModel,
   TimeEntryModel,
   UserModel,
-} from "../../../database/models";
-import { toPlain, toPlainList } from "../../../database/serializers";
-import { taskService } from "../application/task-service";
+} from "../../../database/models.js";
+import { toPlain, toPlainList } from "../../../database/serializers.js";
+import { taskService } from "../application/task-service.js";
 import {
   createTaskSchema,
   dueDateChangeRequestSchema,
@@ -23,7 +23,7 @@ import {
   taskListQuerySchema,
   taskIdParamsSchema,
   timerTransitionSchema,
-} from "./task-validation";
+} from "./task-validation.js";
 
 export const tasksRouter = Router();
 

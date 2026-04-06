@@ -1,8 +1,8 @@
 import bcrypt from "bcryptjs";
 
-import { CompanyRole, UserRole } from "../shared";
-import { env } from "../config/env";
-import { UserModel } from "./models";
+import { CompanyRole, UserRole } from "../shared/index.js";
+import { env } from "../config/env.js";
+import { UserModel } from "./models.js";
 
 export const seedDefaultAdmin = async () => {
   const existingAdmin = await UserModel.findOne({ email: env.adminEmail.toLowerCase() });
@@ -25,4 +25,3 @@ export const seedDefaultAdmin = async () => {
     timezone: "Asia/Kolkata",
   });
 };
-
