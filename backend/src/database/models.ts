@@ -1,4 +1,4 @@
-import mongoose, { Schema } from "mongoose";
+import mongoose, { Schema, type Model } from "mongoose";
 
 import {
   ApprovalStatus,
@@ -162,15 +162,24 @@ taskSchema.index({ assigneeId: 1, status: 1, dueDateUtc: 1 });
 taskSchema.index({ projectId: 1, activityId: 1 });
 approvalRequestSchema.index({ status: 1, requestedAtUtc: 1 });
 
-export const UserModel = mongoose.models.User || mongoose.model("User", userSchema);
-export const TeamModel = mongoose.models.Team || mongoose.model("Team", teamSchema);
-export const ProjectModel = mongoose.models.Project || mongoose.model("Project", projectSchema);
-export const ActivityModel = mongoose.models.Activity || mongoose.model("Activity", activitySchema);
-export const TaskModel = mongoose.models.Task || mongoose.model("Task", taskSchema);
-export const TimeEntryModel =
-  mongoose.models.TimeEntry || mongoose.model("TimeEntry", timeEntrySchema);
-export const ApprovalRequestModel =
-  mongoose.models.ApprovalRequest || mongoose.model("ApprovalRequest", approvalRequestSchema);
-export const CommentModel = mongoose.models.Comment || mongoose.model("Comment", commentSchema);
-export const HolidayModel = mongoose.models.Holiday || mongoose.model("Holiday", holidaySchema);
-export const AuditLogModel = mongoose.models.AuditLog || mongoose.model("AuditLog", auditLogSchema);
+export const UserModel: Model<any> =
+  (mongoose.models.User as Model<any>) || mongoose.model("User", userSchema);
+export const TeamModel: Model<any> =
+  (mongoose.models.Team as Model<any>) || mongoose.model("Team", teamSchema);
+export const ProjectModel: Model<any> =
+  (mongoose.models.Project as Model<any>) || mongoose.model("Project", projectSchema);
+export const ActivityModel: Model<any> =
+  (mongoose.models.Activity as Model<any>) || mongoose.model("Activity", activitySchema);
+export const TaskModel: Model<any> =
+  (mongoose.models.Task as Model<any>) || mongoose.model("Task", taskSchema);
+export const TimeEntryModel: Model<any> =
+  (mongoose.models.TimeEntry as Model<any>) || mongoose.model("TimeEntry", timeEntrySchema);
+export const ApprovalRequestModel: Model<any> =
+  (mongoose.models.ApprovalRequest as Model<any>) ||
+  mongoose.model("ApprovalRequest", approvalRequestSchema);
+export const CommentModel: Model<any> =
+  (mongoose.models.Comment as Model<any>) || mongoose.model("Comment", commentSchema);
+export const HolidayModel: Model<any> =
+  (mongoose.models.Holiday as Model<any>) || mongoose.model("Holiday", holidaySchema);
+export const AuditLogModel: Model<any> =
+  (mongoose.models.AuditLog as Model<any>) || mongoose.model("AuditLog", auditLogSchema);
