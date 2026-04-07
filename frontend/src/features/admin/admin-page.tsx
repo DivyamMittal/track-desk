@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useState } from "react";
 
 import { CompanyRole, UserRole, type User } from "@/shared";
+import { LoadingButton } from "@/components/loading-button";
 import { api } from "@/lib/api";
 import { showSuccessToast } from "@/lib/toast";
 import { supportedTimezones } from "@/shared/timezones";
@@ -34,6 +35,8 @@ export const AdminPage = ({ title }: { title: string }) => {
     companyRole: CompanyRole.MANAGER,
     timezone: "Asia/Kolkata",
   });
+  const [creatingUser, setCreatingUser] = useState(false);
+  const [statusLoadingUserId, setStatusLoadingUserId] = useState<string | null>(null);
 
   const loadUsers = async () => {
     setUsers(await api<User[]>("/users"));
@@ -66,32 +69,44 @@ export const AdminPage = ({ title }: { title: string }) => {
   );
 
   const toggleStatus = async (userId: string, isActive: boolean) => {
-    await api(`/users/${userId}/status`, {
-      method: "PATCH",
-      body: JSON.stringify({ isActive }),
-    });
-    showSuccessToast(isActive ? "User unblocked" : "User blocked");
-    await loadUsers();
+    setStatusLoadingUserId(userId);
+    try {
+      await api(`/users/${userId}/status`, {
+        method: "PATCH",
+        body: JSON.stringify({ isActive }),
+        suppressGlobalLoader: true,
+      });
+      showSuccessToast(isActive ? "User unblocked" : "User blocked");
+      await loadUsers();
+    } finally {
+      setStatusLoadingUserId(null);
+    }
   };
 
   const handleCreate = async (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
 
-    await api("/users", {
-      method: "POST",
-      body: JSON.stringify(form),
-    });
-    showSuccessToast("User created successfully");
+    setCreatingUser(true);
+    try {
+      await api("/users", {
+        method: "POST",
+        body: JSON.stringify(form),
+        suppressGlobalLoader: true,
+      });
+      showSuccessToast("User created successfully");
 
-    setForm({
-      email: "",
-      password: "",
-      fullName: "",
-      userRole: UserRole.MANAGER,
-      companyRole: CompanyRole.MANAGER,
-      timezone: "Asia/Kolkata",
-    });
-    await loadUsers();
+      setForm({
+        email: "",
+        password: "",
+        fullName: "",
+        userRole: UserRole.MANAGER,
+        companyRole: CompanyRole.MANAGER,
+        timezone: "Asia/Kolkata",
+      });
+      await loadUsers();
+    } finally {
+      setCreatingUser(false);
+    }
   };
 
   return (
@@ -193,9 +208,9 @@ export const AdminPage = ({ title }: { title: string }) => {
               </select>
             </label>
             <div className="manager-form-actions manager-form-actions--full">
-              <button className="timesheet-primary-button" type="submit">
+              <LoadingButton className="timesheet-primary-button" loading={creatingUser} type="submit">
                 Create User
-              </button>
+              </LoadingButton>
             </div>
           </form>
         </div>
@@ -232,13 +247,14 @@ export const AdminPage = ({ title }: { title: string }) => {
                   <td>
                     {user.userRole !== UserRole.ADMIN ? (
                       <div className="manager-approval-actions">
-                        <button
+                        <LoadingButton
                           className={user.isActive ? "timesheet-secondary-button" : "timesheet-primary-button"}
+                          loading={statusLoadingUserId === user.id}
                           onClick={() => void toggleStatus(user.id, !user.isActive)}
                           type="button"
                         >
                           {user.isActive ? "Block" : "Unblock"}
-                        </button>
+                        </LoadingButton>
                       </div>
                     ) : (
                       <span className="manager-dashboard-inactive">Protected</span>

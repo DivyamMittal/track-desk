@@ -1,4 +1,5 @@
 import { clearAccessToken, getAccessToken } from "@/features/auth/session";
+import { setGlobalLoading } from "@/lib/loading";
 import { showErrorToast } from "@/lib/toast";
 
 const apiBaseUrl = import.meta.env.VITE_API_BASE_URL ?? "http://localhost:4000/api/v1";
@@ -13,12 +14,18 @@ export class ApiError extends Error {
   }
 }
 
-export const api = async <T>(path: string, init: RequestInit = {}): Promise<T> => {
+type ApiRequestInit = RequestInit & {
+  suppressGlobalLoader?: boolean;
+};
+
+export const api = async <T>(path: string, init: ApiRequestInit = {}): Promise<T> => {
+  const { suppressGlobalLoader = false, ...requestInit } = init;
+
   try {
     const token = getAccessToken();
-    const headers = new Headers(init.headers);
+    const headers = new Headers(requestInit.headers);
 
-    if (!headers.has("Content-Type") && init.body) {
+    if (!headers.has("Content-Type") && requestInit.body) {
       headers.set("Content-Type", "application/json");
     }
 
@@ -26,8 +33,12 @@ export const api = async <T>(path: string, init: RequestInit = {}): Promise<T> =
       headers.set("Authorization", `Bearer ${token}`);
     }
 
+    if (!suppressGlobalLoader) {
+      setGlobalLoading(true);
+    }
+
     const response = await fetch(`${apiBaseUrl}${path}`, {
-      ...init,
+      ...requestInit,
       headers,
     });
 
@@ -56,5 +67,9 @@ export const api = async <T>(path: string, init: RequestInit = {}): Promise<T> =
     const message = error instanceof Error ? error.message : "Network request failed";
     showErrorToast(message);
     throw error;
+  } finally {
+    if (!suppressGlobalLoader) {
+      setGlobalLoading(false);
+    }
   }
 };

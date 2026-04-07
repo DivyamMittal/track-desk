@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 
 import { Priority, ProjectStatus, TaskStatus, type Task, type User } from "@/shared";
+import { LoadingButton } from "@/components/loading-button";
 import { Card, SectionTitle } from "@/ui";
 import { api } from "@/lib/api";
 import { showSuccessToast } from "@/lib/toast";
@@ -59,6 +60,7 @@ export const ManagerProjectsPage = () => {
     dueDateUtc: new Date(Date.now() + 2 * 86400000).toISOString(),
   });
   const [drawerTaskId, setDrawerTaskId] = useState<string | null>(null);
+  const [submittingSection, setSubmittingSection] = useState<"project" | "activity" | "task" | null>(null);
   const activeEmployees = employees.filter((employee) => employee.isActive);
 
   const load = async () => {
@@ -95,10 +97,15 @@ export const ManagerProjectsPage = () => {
           className="form-grid form-grid--two"
           onSubmit={async (event) => {
             event.preventDefault();
-            await api("/projects", { method: "POST", body: JSON.stringify(projectForm) });
-            showSuccessToast("Project created successfully");
-            setProjectForm((current) => ({ ...current, code: "", name: "", description: "" }));
-            await load();
+            setSubmittingSection("project");
+            try {
+              await api("/projects", { method: "POST", body: JSON.stringify(projectForm), suppressGlobalLoader: true });
+              showSuccessToast("Project created successfully");
+              setProjectForm((current) => ({ ...current, code: "", name: "", description: "" }));
+              await load();
+            } finally {
+              setSubmittingSection(null);
+            }
           }}
         >
           <label className="field">
@@ -114,7 +121,7 @@ export const ManagerProjectsPage = () => {
             <textarea className="input textarea" placeholder="Enter project scope and summary" value={projectForm.description} onChange={(e) => setProjectForm((current) => ({ ...current, description: e.target.value }))} />
           </label>
           <div className="manager-form-actions manager-form-actions--full">
-            <button className="timesheet-primary-button" type="submit">Create Project</button>
+            <LoadingButton className="timesheet-primary-button" loading={submittingSection === "project"} type="submit">Create Project</LoadingButton>
           </div>
         </form>
       </Card>
@@ -124,10 +131,15 @@ export const ManagerProjectsPage = () => {
           className="form-grid form-grid--two"
           onSubmit={async (event) => {
             event.preventDefault();
-            await api("/activities", { method: "POST", body: JSON.stringify(activityForm) });
-            showSuccessToast("Activity created successfully");
-            setActivityForm((current) => ({ ...current, name: "", description: "" }));
-            await load();
+            setSubmittingSection("activity");
+            try {
+              await api("/activities", { method: "POST", body: JSON.stringify(activityForm), suppressGlobalLoader: true });
+              showSuccessToast("Activity created successfully");
+              setActivityForm((current) => ({ ...current, name: "", description: "" }));
+              await load();
+            } finally {
+              setSubmittingSection(null);
+            }
           }}
         >
           <label className="field">
@@ -148,7 +160,7 @@ export const ManagerProjectsPage = () => {
             <textarea className="input textarea" placeholder="Enter activity description" value={activityForm.description} onChange={(e) => setActivityForm((current) => ({ ...current, description: e.target.value }))} />
           </label>
           <div className="manager-form-actions manager-form-actions--full">
-            <button className="timesheet-primary-button" type="submit">Create Activity</button>
+            <LoadingButton className="timesheet-primary-button" loading={submittingSection === "activity"} type="submit">Create Activity</LoadingButton>
           </div>
         </form>
       </Card>
@@ -159,10 +171,15 @@ export const ManagerProjectsPage = () => {
           className="form-grid form-grid--two"
           onSubmit={async (event) => {
             event.preventDefault();
-            await api("/tasks", { method: "POST", body: JSON.stringify(taskForm) });
-            showSuccessToast("Task created successfully");
-            setTaskForm((current) => ({ ...current, title: "", description: "" }));
-            await load();
+            setSubmittingSection("task");
+            try {
+              await api("/tasks", { method: "POST", body: JSON.stringify(taskForm), suppressGlobalLoader: true });
+              showSuccessToast("Task created successfully");
+              setTaskForm((current) => ({ ...current, title: "", description: "" }));
+              await load();
+            } finally {
+              setSubmittingSection(null);
+            }
           }}
         >
           <label className="field">
@@ -229,7 +246,7 @@ export const ManagerProjectsPage = () => {
             />
           </label>
           <div className="manager-form-actions">
-            <button className="timesheet-primary-button" type="submit">Create Task</button>
+            <LoadingButton className="timesheet-primary-button" loading={submittingSection === "task"} type="submit">Create Task</LoadingButton>
           </div>
         </form>
       </Card>

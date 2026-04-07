@@ -9,6 +9,7 @@ import {
   User,
   type ApprovalRequest,
 } from "@/shared";
+import { LoadingButton } from "@/components/loading-button";
 import { api } from "@/lib/api";
 import { showSuccessToast } from "@/lib/toast";
 import { useDebounce } from "@/hooks/use-debounce";
@@ -53,6 +54,7 @@ export const ManagerApprovalsPage = () => {
   const [page, setPage] = useState(1);
   const [rejectingApprovalId, setRejectingApprovalId] = useState<string | null>(null);
   const [rejectComment, setRejectComment] = useState("");
+  const [loadingApprovalId, setLoadingApprovalId] = useState<string | null>(null);
 
   const debouncedSearch = useDebounce(searchInput.trim(), 400);
 
@@ -141,17 +143,23 @@ export const ManagerApprovalsPage = () => {
   const pagedApprovals = filteredApprovals.slice((page - 1) * PAGE_SIZE, page * PAGE_SIZE);
 
   const review = async (approvalId: string, status: ApprovalStatus) => {
-    await api(`/approvals/${approvalId}/review`, {
-      method: "POST",
-      body: JSON.stringify({
-        status,
-        managerComment: status === ApprovalStatus.APPROVED ? "Approved" : rejectComment.trim(),
-      }),
-    });
-    showSuccessToast(`Approval ${status.toLowerCase()}`);
-    setRejectingApprovalId(null);
-    setRejectComment("");
-    await load();
+    setLoadingApprovalId(approvalId);
+    try {
+      await api(`/approvals/${approvalId}/review`, {
+        method: "POST",
+        body: JSON.stringify({
+          status,
+          managerComment: status === ApprovalStatus.APPROVED ? "Approved" : rejectComment.trim(),
+        }),
+        suppressGlobalLoader: true,
+      });
+      showSuccessToast(`Approval ${status.toLowerCase()}`);
+      setRejectingApprovalId(null);
+      setRejectComment("");
+      await load();
+    } finally {
+      setLoadingApprovalId(null);
+    }
   };
 
   const summaryCards = useMemo(
@@ -252,13 +260,14 @@ export const ManagerApprovalsPage = () => {
                   <td>
                     {approval.status === ApprovalStatus.PENDING ? (
                       <div className="manager-approval-actions">
-                        <button
+                        <LoadingButton
                           className="timesheet-primary-button"
+                          loading={loadingApprovalId === approval.id}
                           onClick={() => void review(approval.id, ApprovalStatus.APPROVED)}
                           type="button"
                         >
                           Approve
-                        </button>
+                        </LoadingButton>
                         <button
                           className="timesheet-secondary-button"
                           onClick={() => {
@@ -344,14 +353,15 @@ export const ManagerApprovalsPage = () => {
               <button className="timesheet-secondary-button" onClick={() => setRejectingApprovalId(null)} type="button">
                 Cancel
               </button>
-              <button
+              <LoadingButton
                 className="timesheet-primary-button"
+                loading={loadingApprovalId === rejectingApprovalId}
                 disabled={rejectComment.trim().length === 0}
                 onClick={() => void review(rejectingApprovalId, ApprovalStatus.REJECTED)}
                 type="button"
               >
                 Reject Request
-              </button>
+              </LoadingButton>
             </div>
           </div>
         </div>

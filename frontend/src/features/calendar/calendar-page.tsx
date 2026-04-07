@@ -1,6 +1,7 @@
 import { useMemo, useState, useEffect } from "react";
 
 import { UserRole, type Holiday } from "@/shared";
+import { LoadingButton } from "@/components/loading-button";
 import { api } from "@/lib/api";
 import { showSuccessToast } from "@/lib/toast";
 import { useAuth } from "@/features/auth/auth-context";
@@ -44,6 +45,7 @@ export const CalendarPage = () => {
   const [selectedHoliday, setSelectedHoliday] = useState<Holiday | null>(null);
   const [title, setTitle] = useState("");
   const [dateUtc, setDateUtc] = useState("");
+  const [savingHoliday, setSavingHoliday] = useState(false);
 
   const canEdit = user?.userRole === UserRole.ADMIN || user?.userRole === UserRole.MANAGER;
 
@@ -92,24 +94,31 @@ export const CalendarPage = () => {
       dateUtc: new Date(`${dateUtc}T00:00:00.000Z`).toISOString(),
     };
 
-    if (selectedHoliday) {
-      await api(`/calendar/holidays/${selectedHoliday.id}`, {
-        method: "PUT",
-        body: JSON.stringify(payload),
-      });
-      showSuccessToast("Holiday updated");
-    } else {
-      await api("/calendar/holidays", {
-        method: "POST",
-        body: JSON.stringify(payload),
-      });
-      showSuccessToast("Holiday saved");
-    }
+    setSavingHoliday(true);
+    try {
+      if (selectedHoliday) {
+        await api(`/calendar/holidays/${selectedHoliday.id}`, {
+          method: "PUT",
+          body: JSON.stringify(payload),
+          suppressGlobalLoader: true,
+        });
+        showSuccessToast("Holiday updated");
+      } else {
+        await api("/calendar/holidays", {
+          method: "POST",
+          body: JSON.stringify(payload),
+          suppressGlobalLoader: true,
+        });
+        showSuccessToast("Holiday saved");
+      }
 
-    setSelectedHoliday(null);
-    setTitle("");
-    setDateUtc("");
-    await load();
+      setSelectedHoliday(null);
+      setTitle("");
+      setDateUtc("");
+      await load();
+    } finally {
+      setSavingHoliday(false);
+    }
   };
 
   return (
@@ -194,9 +203,9 @@ export const CalendarPage = () => {
                     Cancel
                   </button>
                 ) : null}
-                <button className="timesheet-primary-button" onClick={() => void submitHoliday()} type="button">
+                <LoadingButton className="timesheet-primary-button" loading={savingHoliday} onClick={() => void submitHoliday()} type="button">
                   {selectedHoliday ? "Update Holiday" : "Save Holiday"}
-                </button>
+                </LoadingButton>
               </div>
             </div>
           ) : null}

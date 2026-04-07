@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useState } from "react";
 
 import { type User } from "@/shared";
+import { LoadingButton } from "@/components/loading-button";
 import { api } from "@/lib/api";
 import { showSuccessToast } from "@/lib/toast";
 
@@ -12,6 +13,7 @@ export const ManagerTeamPage = () => {
   const [team, setTeam] = useState<User[]>([]);
   const [availableEmployees, setAvailableEmployees] = useState<User[]>([]);
   const [selectedEmployeeId, setSelectedEmployeeId] = useState("");
+  const [assigning, setAssigning] = useState(false);
 
   const load = async () => {
     const [teamData, availableData] = await Promise.all([
@@ -65,13 +67,19 @@ export const ManagerTeamPage = () => {
                 return;
               }
 
-              await api(`/users/${selectedEmployeeId}/assign-manager`, {
-                method: "POST",
-                body: JSON.stringify({}),
-              });
-              showSuccessToast("Employee assigned to your team");
-              setSelectedEmployeeId("");
-              await load();
+              setAssigning(true);
+              try {
+                await api(`/users/${selectedEmployeeId}/assign-manager`, {
+                  method: "POST",
+                  body: JSON.stringify({}),
+                  suppressGlobalLoader: true,
+                });
+                showSuccessToast("Employee assigned to your team");
+                setSelectedEmployeeId("");
+                await load();
+              } finally {
+                setAssigning(false);
+              }
             }}
           >
             <label className="field field--full">
@@ -90,9 +98,9 @@ export const ManagerTeamPage = () => {
               </select>
             </label>
             <div className="manager-form-actions manager-form-actions--full">
-              <button className="timesheet-primary-button" type="submit">
+              <LoadingButton className="timesheet-primary-button" loading={assigning} type="submit">
                 Add Existing Employee
-              </button>
+              </LoadingButton>
             </div>
           </form>
         </div>

@@ -8,6 +8,7 @@ import {
   type Task,
   type TimeEntry,
 } from "@/shared";
+import { LoadingButton } from "@/components/loading-button";
 import { api } from "@/lib/api";
 import { showSuccessToast } from "@/lib/toast";
 
@@ -53,6 +54,7 @@ export const EmployeeTimesheetPage = () => {
   const [elapsedSeconds, setElapsedSeconds] = useState(0);
   const [showManualLogForm, setShowManualLogForm] = useState(false);
   const [selectedTaskId, setSelectedTaskId] = useState("");
+  const [loadingAction, setLoadingAction] = useState<string | null>(null);
   const [manualLog, setManualLog] = useState({
     taskId: "",
     startTimeUtc: "",
@@ -263,21 +265,27 @@ export const EmployeeTimesheetPage = () => {
             ))}
           </select>
           {canStartTask ? (
-            <button
+            <LoadingButton
               className="timesheet-primary-button"
-              onClick={() => {
+              loading={loadingAction === "start-task"}
+              onClick={async () => {
+                setLoadingAction("start-task");
                 setSelectedTaskId(currentActionTask!.id);
-                return void api(`/tasks/${currentActionTask!.id}/start-timer`, {
-                  method: "POST",
-                }).then(() => {
+                try {
+                  await api(`/tasks/${currentActionTask!.id}/start-timer`, {
+                    method: "POST",
+                    suppressGlobalLoader: true,
+                  });
                   showSuccessToast("Timer started");
-                  return load();
-                });
+                  await load();
+                } finally {
+                  setLoadingAction(null);
+                }
               }}
               type="button"
             >
               Start Task
-            </button>
+            </LoadingButton>
           ) : null}
           <button
             className="timesheet-secondary-button"
@@ -322,82 +330,99 @@ export const EmployeeTimesheetPage = () => {
             <div className="timesheet-timer-actions">
               {selectedTaskIsRunning ? (
                 <div className="timesheet-button-inline">
-                  <button
+                  <LoadingButton
                     className="timesheet-secondary-button"
-                    onClick={() =>
-                      void api(
-                        `/tasks/${currentActionTask.id}/timer-transition`,
-                        {
+                    loading={loadingAction === "pause-task"}
+                    onClick={async () => {
+                      setLoadingAction("pause-task");
+                      try {
+                        await api(`/tasks/${currentActionTask.id}/timer-transition`, {
                           method: "POST",
                           body: JSON.stringify({
                             timerState: TimerState.PAUSED,
                           }),
-                        },
-                      ).then(() => {
+                          suppressGlobalLoader: true,
+                        });
                         showSuccessToast("Timer paused");
-                        return load();
-                      })
-                    }
+                        await load();
+                      } finally {
+                        setLoadingAction(null);
+                      }
+                    }}
                     type="button"
                   >
                     Pause
-                  </button>
-                  <button
+                  </LoadingButton>
+                  <LoadingButton
                     className="timesheet-primary-button"
-                    onClick={() =>
-                      void api(
-                        `/tasks/${currentActionTask.id}/timer-transition`,
-                        {
+                    loading={loadingAction === "stop-task"}
+                    onClick={async () => {
+                      setLoadingAction("stop-task");
+                      try {
+                        await api(`/tasks/${currentActionTask.id}/timer-transition`, {
                           method: "POST",
                           body: JSON.stringify({
                             timerState: TimerState.STOPPED,
                           }),
-                        },
-                      ).then(() => {
+                          suppressGlobalLoader: true,
+                        });
                         showSuccessToast("Timer stopped");
-                        return load();
-                      })
-                    }
+                        await load();
+                      } finally {
+                        setLoadingAction(null);
+                      }
+                    }}
                     type="button"
                   >
                     Stop
-                  </button>
+                  </LoadingButton>
                 </div>
               ) : canStartFromCard ? (
-                <button
+                <LoadingButton
                   className="timesheet-primary-button"
-                  onClick={() => {
+                  loading={loadingAction === "resume-task"}
+                  onClick={async () => {
+                    setLoadingAction("resume-task");
                     setSelectedTaskId(currentActionTask.id);
-                    return void api(
-                      `/tasks/${currentActionTask.id}/start-timer`,
-                      { method: "POST" },
-                    ).then(() => {
+                    try {
+                      await api(`/tasks/${currentActionTask.id}/start-timer`, {
+                        method: "POST",
+                        suppressGlobalLoader: true,
+                      });
                       showSuccessToast("Work resumed");
-                      return load();
-                    });
+                      await load();
+                    } finally {
+                      setLoadingAction(null);
+                    }
                   }}
                   type="button"
                 >
                   {currentActionTask.status === TaskStatus.ON_HOLD
                     ? "Resume"
                     : "Start Timer"}
-                </button>
+                </LoadingButton>
               ) : null}
               {canRequestCompletion ? (
-                <button
+                <LoadingButton
                   className="timesheet-secondary-button"
-                  onClick={() =>
-                    void api(`/tasks/${currentActionTask.id}/request-completion`, {
-                      method: "POST",
-                    }).then(() => {
+                  loading={loadingAction === "mark-completed"}
+                  onClick={async () => {
+                    setLoadingAction("mark-completed");
+                    try {
+                      await api(`/tasks/${currentActionTask.id}/request-completion`, {
+                        method: "POST",
+                        suppressGlobalLoader: true,
+                      });
                       showSuccessToast("Completion request submitted");
-                      return load();
-                    })
-                  }
+                      await load();
+                    } finally {
+                      setLoadingAction(null);
+                    }
+                  }}
                   type="button"
                 >
                   Mark Completed
-                </button>
+                </LoadingButton>
               ) : null}
             </div>
           </div>
@@ -410,24 +435,30 @@ export const EmployeeTimesheetPage = () => {
             className="timesheet-manual-form"
             onSubmit={async (event) => {
               event.preventDefault();
-              await api(`/tasks/${manualLog.taskId}/manual-log`, {
-                method: "POST",
-                body: JSON.stringify({
-                  ...manualLog,
-                  startTimeUtc: new Date(manualLog.startTimeUtc).toISOString(),
-                  endTimeUtc: new Date(manualLog.endTimeUtc).toISOString(),
-                }),
-              });
-              showSuccessToast("Manual log request submitted");
-              setManualLog({
-                taskId: currentActionTask?.id ?? "",
-                startTimeUtc: "",
-                endTimeUtc: "",
-                description: "",
-                reason: "",
-              });
-              setShowManualLogForm(false);
-              await load();
+              setLoadingAction("manual-log");
+              try {
+                await api(`/tasks/${manualLog.taskId}/manual-log`, {
+                  method: "POST",
+                  body: JSON.stringify({
+                    ...manualLog,
+                    startTimeUtc: new Date(manualLog.startTimeUtc).toISOString(),
+                    endTimeUtc: new Date(manualLog.endTimeUtc).toISOString(),
+                  }),
+                  suppressGlobalLoader: true,
+                });
+                showSuccessToast("Manual log request submitted");
+                setManualLog({
+                  taskId: currentActionTask?.id ?? "",
+                  startTimeUtc: "",
+                  endTimeUtc: "",
+                  description: "",
+                  reason: "",
+                });
+                setShowManualLogForm(false);
+                await load();
+              } finally {
+                setLoadingAction(null);
+              }
             }}
           >
             <select
@@ -491,9 +522,9 @@ export const EmployeeTimesheetPage = () => {
                 }))
               }
             />
-            <button className="timesheet-primary-button" type="submit">
+            <LoadingButton className="timesheet-primary-button" loading={loadingAction === "manual-log"} type="submit">
               Submit Manual Log
-            </button>
+            </LoadingButton>
           </form>
         </section>
       ) : null}

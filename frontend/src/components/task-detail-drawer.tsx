@@ -15,6 +15,7 @@ import {
   type TimeEntry,
   type User,
 } from "@/shared";
+import { LoadingButton } from "@/components/loading-button";
 import { api } from "@/lib/api";
 import { showSuccessToast } from "@/lib/toast";
 import { useAuth } from "@/features/auth/auth-context";
@@ -111,6 +112,7 @@ export const TaskDetailDrawer = ({
   const [showSuccessModal, setShowSuccessModal] = useState(false);
   const [requestedDueDate, setRequestedDueDate] = useState("");
   const [requestReason, setRequestReason] = useState("");
+  const [loadingAction, setLoadingAction] = useState<string | null>(null);
 
   const load = async () => {
     if (!taskId) {
@@ -245,18 +247,32 @@ export const TaskDetailDrawer = ({
     }
 
     if (action === "start") {
-      await api(`/tasks/${detail.task.id}/start-timer`, { method: "POST" });
-      await handleTaskRefresh("Timer started");
+      setLoadingAction("timer-start");
+      try {
+        await api(`/tasks/${detail.task.id}/start-timer`, {
+          method: "POST",
+          suppressGlobalLoader: true,
+        });
+        await handleTaskRefresh("Timer started");
+      } finally {
+        setLoadingAction(null);
+      }
       return;
     }
 
-    await api(`/tasks/${detail.task.id}/timer-transition`, {
-      method: "POST",
-      body: JSON.stringify({
-        timerState: action === "pause" ? TimerState.PAUSED : TimerState.STOPPED,
-      }),
-    });
-    await handleTaskRefresh(action === "pause" ? "Timer paused" : "Timer stopped");
+    setLoadingAction(action === "pause" ? "timer-pause" : "timer-stop");
+    try {
+      await api(`/tasks/${detail.task.id}/timer-transition`, {
+        method: "POST",
+        body: JSON.stringify({
+          timerState: action === "pause" ? TimerState.PAUSED : TimerState.STOPPED,
+        }),
+        suppressGlobalLoader: true,
+      });
+      await handleTaskRefresh(action === "pause" ? "Timer paused" : "Timer stopped");
+    } finally {
+      setLoadingAction(null);
+    }
   };
 
   const handleCommentSubmit = async () => {
@@ -264,16 +280,22 @@ export const TaskDetailDrawer = ({
       return;
     }
 
-    await api(`/comments/${detail.task.id}`, {
-      method: "POST",
-      body: JSON.stringify({
-        body: commentBody.trim(),
-        visibility: CommentVisibility.SHARED,
-      }),
-    });
+    setLoadingAction("comment-post");
+    try {
+      await api(`/comments/${detail.task.id}`, {
+        method: "POST",
+        body: JSON.stringify({
+          body: commentBody.trim(),
+          visibility: CommentVisibility.SHARED,
+        }),
+        suppressGlobalLoader: true,
+      });
 
-    setCommentBody("");
-    await handleTaskRefresh("Comment posted");
+      setCommentBody("");
+      await handleTaskRefresh("Comment posted");
+    } finally {
+      setLoadingAction(null);
+    }
   };
 
   const handleDueDateRequest = async () => {
@@ -281,18 +303,24 @@ export const TaskDetailDrawer = ({
       return;
     }
 
-    await api(`/tasks/${task.id}/request-due-date-change`, {
-      method: "POST",
-      body: JSON.stringify({
-        dueDateUtc: new Date(`${requestedDueDate}T00:00:00.000Z`).toISOString(),
-        reason: requestReason.trim(),
-      }),
-    });
+    setLoadingAction("due-date-request");
+    try {
+      await api(`/tasks/${task.id}/request-due-date-change`, {
+        method: "POST",
+        body: JSON.stringify({
+          dueDateUtc: new Date(`${requestedDueDate}T00:00:00.000Z`).toISOString(),
+          reason: requestReason.trim(),
+        }),
+        suppressGlobalLoader: true,
+      });
 
-    setShowEditModal(false);
-    setShowSuccessModal(true);
-    setRequestReason("");
-    await handleTaskRefresh();
+      setShowEditModal(false);
+      setShowSuccessModal(true);
+      setRequestReason("");
+      await handleTaskRefresh();
+    } finally {
+      setLoadingAction(null);
+    }
   };
 
   const handleCompletionRequest = async () => {
@@ -300,10 +328,16 @@ export const TaskDetailDrawer = ({
       return;
     }
 
-    await api(`/tasks/${task.id}/request-completion`, {
-      method: "POST",
-    });
-    await handleTaskRefresh("Completion request submitted");
+    setLoadingAction("completion-request");
+    try {
+      await api(`/tasks/${task.id}/request-completion`, {
+        method: "POST",
+        suppressGlobalLoader: true,
+      });
+      await handleTaskRefresh("Completion request submitted");
+    } finally {
+      setLoadingAction(null);
+    }
   };
 
   if (!isOpen) {
@@ -389,24 +423,24 @@ export const TaskDetailDrawer = ({
                     <div className="task-drawer__timer-actions">
                       {canControlTimer ? (
                         !runningEntry ? (
-                          <button className="timesheet-primary-button" onClick={() => void handleTimerAction("start")} type="button">
+                          <LoadingButton className="timesheet-primary-button" loading={loadingAction === "timer-start"} onClick={() => void handleTimerAction("start")} type="button">
                             Start
-                          </button>
+                          </LoadingButton>
                         ) : (
                           <>
-                            <button className="timesheet-secondary-button" onClick={() => void handleTimerAction("pause")} type="button">
+                            <LoadingButton className="timesheet-secondary-button" loading={loadingAction === "timer-pause"} onClick={() => void handleTimerAction("pause")} type="button">
                               Pause
-                            </button>
-                            <button className="timesheet-primary-button" onClick={() => void handleTimerAction("stop")} type="button">
+                            </LoadingButton>
+                            <LoadingButton className="timesheet-primary-button" loading={loadingAction === "timer-stop"} onClick={() => void handleTimerAction("stop")} type="button">
                               Stop
-                            </button>
+                            </LoadingButton>
                           </>
                         )
                       ) : null}
                       {canRequestCompletion ? (
-                        <button className="timesheet-secondary-button" onClick={() => void handleCompletionRequest()} type="button">
+                        <LoadingButton className="timesheet-secondary-button" loading={loadingAction === "completion-request"} onClick={() => void handleCompletionRequest()} type="button">
                           Mark Completed
-                        </button>
+                        </LoadingButton>
                       ) : null}
                     </div>
                   ) : null}
@@ -449,9 +483,9 @@ export const TaskDetailDrawer = ({
                   onChange={(event) => setCommentBody(event.target.value)}
                 />
                 <div className="task-drawer__comment-actions">
-                  <button className="timesheet-secondary-button" onClick={() => void handleCommentSubmit()} type="button">
+                  <LoadingButton className="timesheet-secondary-button" loading={loadingAction === "comment-post"} onClick={() => void handleCommentSubmit()} type="button">
                     Post Comment
-                  </button>
+                  </LoadingButton>
                 </div>
               </section>
               {approvals.length > 0 ? (
@@ -558,9 +592,9 @@ export const TaskDetailDrawer = ({
               <button className="timesheet-secondary-button" onClick={() => setShowEditModal(false)} type="button">
                 Cancel
               </button>
-              <button className="timesheet-primary-button" onClick={() => void handleDueDateRequest()} type="button">
+              <LoadingButton className="timesheet-primary-button" loading={loadingAction === "due-date-request"} onClick={() => void handleDueDateRequest()} type="button">
                 Save Changes
-              </button>
+              </LoadingButton>
             </div>
           </div>
         </div>

@@ -2,6 +2,7 @@ import { useEffect, useMemo, useState } from "react";
 import { useNavigate } from "react-router-dom";
 
 import { ApprovalStatus, ApprovalType, TaskStatus } from "@/shared";
+import { LoadingButton } from "@/components/loading-button";
 import { api } from "@/lib/api";
 import { showSuccessToast } from "@/lib/toast";
 
@@ -88,6 +89,7 @@ export const ManagerDashboardPage = () => {
   const [weekOffset, setWeekOffset] = useState(0);
   const [statusFilter, setStatusFilter] = useState("");
   const [data, setData] = useState<ManagerDashboardResponse | null>(null);
+  const [loadingApprovalId, setLoadingApprovalId] = useState<string | null>(null);
 
   const load = async (offset: number) => {
     setData(await api<ManagerDashboardResponse>(`/analytics/dashboard?weekOffset=${offset}`));
@@ -98,16 +100,22 @@ export const ManagerDashboardPage = () => {
   }, [weekOffset]);
 
   const reviewApproval = async (approvalId: string, status: ApprovalStatus) => {
-    await api(`/approvals/${approvalId}/review`, {
-      method: "POST",
-      body: JSON.stringify({
-        status,
-        managerComment: status === ApprovalStatus.APPROVED ? "Approved" : "Rejected",
-      }),
-    });
+    setLoadingApprovalId(approvalId);
+    try {
+      await api(`/approvals/${approvalId}/review`, {
+        method: "POST",
+        body: JSON.stringify({
+          status,
+          managerComment: status === ApprovalStatus.APPROVED ? "Approved" : "Rejected",
+        }),
+        suppressGlobalLoader: true,
+      });
 
-    showSuccessToast(`Approval ${status.toLowerCase()}`);
-    await load(weekOffset);
+      showSuccessToast(`Approval ${status.toLowerCase()}`);
+      await load(weekOffset);
+    } finally {
+      setLoadingApprovalId(null);
+    }
   };
 
   const filteredActivity = useMemo(() => {
@@ -241,20 +249,22 @@ export const ManagerDashboardPage = () => {
                   <td>{formatDate(approval.requestedAtUtc)}</td>
                   <td>
                     <div className="manager-approval-actions">
-                      <button
+                      <LoadingButton
                         className="timesheet-primary-button"
+                        loading={loadingApprovalId === approval.id}
                         onClick={() => void reviewApproval(approval.id, ApprovalStatus.APPROVED)}
                         type="button"
                       >
                         Approve
-                      </button>
-                      <button
+                      </LoadingButton>
+                      <LoadingButton
                         className="timesheet-secondary-button"
+                        loading={loadingApprovalId === approval.id}
                         onClick={() => void reviewApproval(approval.id, ApprovalStatus.REJECTED)}
                         type="button"
                       >
                         Reject
-                      </button>
+                      </LoadingButton>
                     </div>
                   </td>
                 </tr>

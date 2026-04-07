@@ -72,6 +72,7 @@ export const AuthProvider = ({ children }: PropsWithChildren) => {
     const data = await api<LoginResponse>("/auth/login", {
       method: "POST",
       body: JSON.stringify({ email, password }),
+      suppressGlobalLoader: true,
     });
 
     setAccessToken(data.accessToken);

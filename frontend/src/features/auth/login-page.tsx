@@ -1,5 +1,6 @@
 import { useState } from "react";
 
+import { LoadingButton } from "@/components/loading-button";
 import { Card } from "@/ui";
 import { useAuth } from "./auth-context";
 
@@ -42,9 +43,9 @@ export const LoginPage = () => {
             />
           </label>
           {error ? <p className="error-text">{error}</p> : null}
-          <button className="button button--primary" disabled={submitting} type="submit">
-            {submitting ? "Signing in..." : "Sign In"}
-          </button>
+          <LoadingButton className="button button--primary" loading={submitting} type="submit">
+            Sign In
+          </LoadingButton>
         </form>
       </Card>
     </div>
