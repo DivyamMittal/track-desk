@@ -165,6 +165,16 @@ export const TaskDetailDrawer = ({
     [detail?.entries],
   );
 
+  const previouslyLoggedSeconds = useMemo(() => {
+    if (!detail) {
+      return 0;
+    }
+
+    return detail.entries
+      .filter((entry) => entry.id !== runningEntry?.id)
+      .reduce((sum, entry) => sum + (entry.durationSeconds ?? entry.durationMinutes * 60), 0);
+  }, [detail, runningEntry?.id]);
+
   useEffect(() => {
     if (!runningEntry) {
       setElapsedSeconds(0);
@@ -175,7 +185,7 @@ export const TaskDetailDrawer = ({
       const storedSeconds = runningEntry.durationSeconds ?? runningEntry.durationMinutes * 60;
       const startMs = new Date(runningEntry.startTimeUtc).getTime();
       const liveSeconds = Math.max(0, Math.floor((Date.now() - startMs) / 1000));
-      setElapsedSeconds(Math.max(storedSeconds, liveSeconds));
+      setElapsedSeconds(previouslyLoggedSeconds + Math.max(storedSeconds, liveSeconds));
     };
 
     compute();
@@ -184,7 +194,7 @@ export const TaskDetailDrawer = ({
     return () => {
       window.clearInterval(intervalId);
     };
-  }, [runningEntry?.id]);
+  }, [runningEntry?.id, previouslyLoggedSeconds]);
 
   const loggedSeconds = useMemo(() => {
     if (!detail) {
@@ -206,6 +216,14 @@ export const TaskDetailDrawer = ({
   const canControlTimer =
     user?.userRole === UserRole.EMPLOYEE &&
     task?.assigneeId === user.id &&
+    task.status !== TaskStatus.COMPLETED &&
+    task.status !== TaskStatus.APPROVAL_PENDING;
+
+  const canRequestCompletion =
+    user?.userRole === UserRole.EMPLOYEE &&
+    task?.assigneeId === user.id &&
+    task.status !== TaskStatus.PENDING &&
+    task.status !== TaskStatus.WIP &&
     task.status !== TaskStatus.COMPLETED &&
     task.status !== TaskStatus.APPROVAL_PENDING;
 
@@ -275,6 +293,17 @@ export const TaskDetailDrawer = ({
     setShowSuccessModal(true);
     setRequestReason("");
     await handleTaskRefresh();
+  };
+
+  const handleCompletionRequest = async () => {
+    if (!task) {
+      return;
+    }
+
+    await api(`/tasks/${task.id}/request-completion`, {
+      method: "POST",
+    });
+    await handleTaskRefresh("Completion request submitted");
   };
 
   if (!isOpen) {
@@ -356,22 +385,29 @@ export const TaskDetailDrawer = ({
                 <span>Timer {runningEntry ? "Running" : "State"}</span>
                 <div className="task-drawer__timer-row">
                   <strong>{runningEntry ? formatDuration(elapsedSeconds) : formatDuration(loggedSeconds)}</strong>
-                  {canControlTimer ? (
+                  {canControlTimer || canRequestCompletion ? (
                     <div className="task-drawer__timer-actions">
-                      {!runningEntry ? (
-                        <button className="timesheet-primary-button" onClick={() => void handleTimerAction("start")} type="button">
-                          Start
+                      {canControlTimer ? (
+                        !runningEntry ? (
+                          <button className="timesheet-primary-button" onClick={() => void handleTimerAction("start")} type="button">
+                            Start
+                          </button>
+                        ) : (
+                          <>
+                            <button className="timesheet-secondary-button" onClick={() => void handleTimerAction("pause")} type="button">
+                              Pause
+                            </button>
+                            <button className="timesheet-primary-button" onClick={() => void handleTimerAction("stop")} type="button">
+                              Stop
+                            </button>
+                          </>
+                        )
+                      ) : null}
+                      {canRequestCompletion ? (
+                        <button className="timesheet-secondary-button" onClick={() => void handleCompletionRequest()} type="button">
+                          Mark Completed
                         </button>
-                      ) : (
-                        <>
-                          <button className="timesheet-secondary-button" onClick={() => void handleTimerAction("pause")} type="button">
-                            Pause
-                          </button>
-                          <button className="timesheet-primary-button" onClick={() => void handleTimerAction("stop")} type="button">
-                            Stop
-                          </button>
-                        </>
-                      )}
+                      ) : null}
                     </div>
                   ) : null}
                 </div>

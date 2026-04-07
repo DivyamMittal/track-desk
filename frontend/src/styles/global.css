@@ -295,6 +295,11 @@ select {
   background: #111111;
 }
 
+.timesheet-dot--active {
+  background: #1ea35b;
+  box-shadow: 0 0 0 4px rgba(30, 163, 91, 0.12);
+}
+
 .timesheet-label,
 .timesheet-kpi-label {
   text-transform: uppercase;
@@ -388,6 +393,16 @@ select {
   color: #333333;
 }
 
+.timesheet-status--success {
+  background: #dff7e9;
+  color: #0d7a40;
+}
+
+.timesheet-status--ghost {
+  background: #f6f6f6;
+  color: #8a8a8a;
+}
+
 .timesheet-manual-card {
   padding: 16px;
 }
@@ -434,9 +449,8 @@ select {
   color: #9b9b9b;
 }
 
-.timesheet-actions-cell {
-  white-space: nowrap;
-  color: #666666;
+.timesheet-table-row--selected {
+  background: rgba(17, 17, 17, 0.05);
 }
 
 .timesheet-kpi-grid {
